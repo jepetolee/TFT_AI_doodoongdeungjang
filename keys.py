@@ -21,12 +21,14 @@ def  sell():
 def cost_up():
     pyautogui.press('f')
 
-def select(x,y):
+def move(x,y):
     pyautogui.click(x,y,button='right')
+
+def select(x,y):
+    pyautogui.click(x,y,button='left')
 
 def lock():
     pyautogui.click(1500,900,button='left')
-
 
 def check_Enemies():
     pyautogui.press('q')
