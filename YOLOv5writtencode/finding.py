@@ -32,7 +32,7 @@ class LoadImages:  # for inference
         img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
         img = np.ascontiguousarray(img)
 
-        return img, im0s
+        return img, img0
 
 
 def letterbox(img, new_shape=(1920, 1080), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True):
@@ -236,13 +236,16 @@ def findthescreen():# 게임 등수, 회전초밥, 일반게임, 게임 재시�
 def checktheboxes():#게임 내 박스 파일을 조사하여 캐릭터 배치 현황을 이해하는 함수
     global enviroment
     device = torch.device('cpu')  # 게임내에서는 cud 0으로 바꾸자!
-    saved_model_path = 'yolov5xenv.pt'
+    saved_model_path = 'yolov5xnum.pt'
     model = attempt_load(weights=saved_model_path, map_location=device)
+
     screen = np.array(ImageGrab.grab(bbox=(0, 0, 1920, 1080)))
+    dataset = LoadImages(screen)
+
     names = model.module.names if hasattr(model, 'module') else model.names
-    image = torch.zeros((1, 3, 1920, 1080), device=device)
-    _ = model(image) if device.type != 'cpu' else None
-    dataset = LoadImages(image)
+    colors = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(names))]
+    img = torch.zeros((1, 3, 1920, 1080), device=device)
+    _ = model(img) if device.type != 'cpu' else None
     for img, im0s in dataset:
         img = torch.from_numpy(img).to(device)
         img = img.float()  # uint8 to fp16/32
@@ -250,36 +253,45 @@ def checktheboxes():#게임 내 박스 파일을 조사하여 캐릭터 배치 �
         if img.ndimension() == 3:
             img = img.unsqueeze(0)
 
-        t1 = torch_utils.time_synchronized()
         pred = model(img, augment='store_true')[0]
 
         pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, classes=opt.classes, agnostic=opt.agnostic_nms)
 
-        if classify:
-            pred = apply_classifier(pred, modelc, img, im0s)
-
         for i, det in enumerate(pred):  # detections per image
+            p, s, im0 = path, '', im0s
 
-            im0 = im0s
+            s += '%gx%g ' % img.shape[2:]
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             if det is not None and len(det):
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
 
+                for c in det[:, -1].unique():
+                    n = (det[:, -1] == c).sum()  # detections per class
+                    s += '%g %ss, ' % (n, names[int(c)])  # add to string
+
+                # Write results
                 for *xyxy, conf, cls in det:
-                    enviroment = int(cls)
+
+                    if save_img or view_img:  # Add bbox to image
+                        label = '%s %.2f' % (names[int(cls)], conf)
+                        plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+                        enviroment = int(cls)
 
     return enviroment
 
 def check_numbers():
     global enviroment
-    device = torch.device('cpu')  # 게임내에서는 cud 0으로 바꾸자!
-    saved_model_path = 'yolov5xenv.pt'
+    device = torch.device('cpu') # 게임내에서는 cud 0으로 바꾸자!
+    saved_model_path = 'yolov5xnum.pt'
     model = attempt_load(weights=saved_model_path, map_location=device)
+
     screen = np.array(ImageGrab.grab(bbox=(0, 0, 1920, 1080)))
+    dataset = LoadImages(screen)
+
     names = model.module.names if hasattr(model, 'module') else model.names
-    image = torch.zeros((1, 3, 1920, 1080), device=device)
-    _ = model(image) if device.type != 'cpu' else None
-    dataset = LoadImages(image)
+    colors = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(names))]
+    img = torch.zeros((1, 3, 1920, 1080), device=device)
+    _ = model(img) if device.type != 'cpu' else None
     for img, im0s in dataset:
         img = torch.from_numpy(img).to(device)
         img = img.float()  # uint8 to fp16/32
@@ -287,22 +299,29 @@ def check_numbers():
         if img.ndimension() == 3:
             img = img.unsqueeze(0)
 
-        t1 = torch_utils.time_synchronized()
+
         pred = model(img, augment='store_true')[0]
 
         pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, classes=opt.classes, agnostic=opt.agnostic_nms)
 
-        if classify:
-            pred = apply_classifier(pred, modelc, img, im0s)
-
         for i, det in enumerate(pred):  # detections per image
-            im0 = im0s
-            gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
+            p, s, im0 = path, '', im0s
+
+            s += '%gx%g ' % img.shape[2:]
             if det is not None and len(det):
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
 
+                for c in det[:, -1].unique():
+                    n = (det[:, -1] == c).sum()  # detections per class
+                    s += '%g %ss, ' % (n, names[int(c)])  # add to string
+
+                # Write results
                 for *xyxy, conf, cls in det:
-                    enviroment = int(cls)
+
+                    if save_img or view_img:  # Add bbox to image
+                        label = '%s %.2f' % (names[int(cls)], conf)
+                        plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+                        enviroment = int(cls)
 
     return enviroment
 
