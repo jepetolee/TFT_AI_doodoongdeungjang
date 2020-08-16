@@ -4,6 +4,35 @@ import torch.nn.functional as f
 import torch.optim as optim
 import numpy as np
 
+class DQN(nn.Module):
+    def __init__(self,lr,input_dims,fc1_dims,fc2_dims,n_actions):
+        super(DQN,self).__init__()
+        self.input_dims =input_dims
+        self.lr=lr
+        self.fc1_dims=fc1_dims
+        self.fc2_dims=fc2_dims
+        self.n_actions = n_actions
+
+        self.fc1 = nn.Linear(self.input_dims, self.fc1_dims)
+        self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
+        self.fc3 = nn.Linear(self.fc2_dims, self.n_actions)
+        self.optimizer = optim.Adam(self.parameters(), lr=self.lr)
+        self.Device = T.device('cuda:0' if T.cuda.is_available() else 'cpu:0')
+        self.to(self.Device)
+
+    def forward(self,x):
+        x=f.relu(self.fc1(x))
+        x=f.relu(self.fc2(x))
+        x=self.fc3(x)
+        return x
+
+    def sample_action(self, obs, epsilon):
+        out = self.forward(obs)
+        coin = random.random()
+        if coin < epsilon:
+            return random.randint(0, 1)
+        else:
+            return out.argmax().item()
 
 class G_net(nn.Module):
     def __init__(self, lr, input_dims, fc1_dims, fc2_dims, n_actions):
@@ -35,3 +64,5 @@ class agent(object):
         self.log = None
         self.actor = G_net(a, input_dims, l1_size, l2_size, n_actions)
         self.critic = G_net(b, input_dims, l1_size, l2_size, n_actions)
+model = DQN
+T.save(model,'running_act.pt')

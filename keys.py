@@ -40,8 +40,10 @@ def select(x, y):
     pyautogui.click(x, y, button='left')
 
 
-def click(x, y):
+def move(x, y):
     pyautogui.click(x, y, button='right')
+    result=0
+    return result
 
 
 def lock():
