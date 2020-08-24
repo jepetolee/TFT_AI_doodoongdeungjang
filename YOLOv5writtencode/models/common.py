@@ -1,6 +1,6 @@
 # This file contains modules common to various models
 
-from utils.utils import *
+from YOLOv5writtencode.utils.utils import *
 
 
 def autopad(k, p=None):  # kernel, padding

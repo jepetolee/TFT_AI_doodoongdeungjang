@@ -22,7 +22,7 @@ latest_result = 0
 rounds = 0
 survived_enemies = 0
 survived_allies = 0
-stage = 0
+stage = 1
 # 다음 변수들은 라운드에 따라 q러닝을 다르게 설계하려고 하기 때문에 중요하다.
 
 lEA = 1  # level equates accomodates
