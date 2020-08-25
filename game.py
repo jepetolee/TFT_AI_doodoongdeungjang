@@ -6,26 +6,67 @@ import numpy as np
 from PIL import ImageGrab
 from Pi import *
 import torch
-from YOLOv5writtencode.finding import *
+import YOLOv5writtencode.finding as find
 import torch.backends.cudnn as cudnn
+import pandas as pd
 
 
-def Running_ACT(x, y, saved_batches):  # 회전 초밥 한정
-    round = rounds
-    device = torch.device('')  # 게임내에서는 cud 0으로 바꾸자!
-    saved_model_path = 'running_act_for_cycle.pt'  # x,y 좌표에 해당하는 모델 데려오고, 이동
-    model = torch.load(weights=saved_model_path, map_location=device)
-    target = []  # 선택 챔피언 순서,MCTS를 불러와서 이제 값을 구할 거임
+def Running_ACT(stage, grade):  # Episode greedy algorithm
 
-    check = 1  # look(saved_batches, target)
-    if check == 1:
-        point = 10
-    elif check == 2:
-        point = 5
-    elif check == 3:
-        point = -5
+    if stage == 1:
+        champions_file = open('YOLOv5writtencode/inference/chamion_output/champion.txt', 'r')
+        items_file = open('YOLOv5writtencode/inference/item_output/item.txt', 'r')
+        weights = pd.read_csv('evaluate_data.csv', header=None)
+        item_weights = pd.read_csv('evaluate_item.csv', header=None)
+        synergy_fitness = [0, 0, 0, 0, 0, 0, 0, 0]  # 시너지 필요도 계산 나중에 불러와야합니다. 남은 시너지,
+        item_needs = [0]  # 아이템 필요도를 산출하는 형식의 데이터도 구현이 필요합니다. 필요한개수, 그리고, 아이템 번호의 강화학습 정도
+        selection = []
+        count = 0
+        while True:
+            cham = champions_file.readline().split()
+            item = items_file.readline().split()
+            if not cham: break
+            selection.append([cham[0], item[0]])
+            count += 1
+
+        for i in range(count):
+            Data = [int(weights[2][stage]) * (int(item_needs[0])) + \
+                    int(weights[1][stage]) * (int(synergy_fitness[0])) + \
+                    int(weights[4][stage]) * int(selection[i][0]) + \
+                    int(weights[3][int(stage)]) * int(champions[int(selection[i][0])][0])]
+            selection[i].append(Data[0])
+            i += 1
+        selection.sort(key=lambda x: x[2], reverse=True)
+        print(selection)  # 이후에 예측거리만을 클릭한다.
+
     else:
-        point = -10
+        # 등수에 따른 경과시간을 잰후
+
+        champions_file = open('YOLOv5writtencode/inference/chamion_output/champion.txt', 'r')
+        items_file = open('YOLOv5writtencode/inference/item_output/item.txt', 'r')
+        weights = pd.read_csv('evaluate_data.csv', header=None)
+        item_weights = pd.read_csv('evaluate_item.csv', header=None)
+        synergy_fitness = [0, 0, 0, 0, 0, 0, 0, 0]  # 시너지 필요도 계산 나중에 불러와야합니다. 남은 시너지,
+        item_needs = [0]  # 아이템 필요도를 산출하는 형식의 데이터도 구현이 필요합니다. 필요한개수, 그리고, 아이템 번호의 강화학습 정도
+        selection = []
+        count = 0
+        while True:
+            cham = champions_file.readline().split()
+            item = items_file.readline().split()
+            if not cham: break
+            selection.append([cham[0], item[0]])
+            count += 1
+
+        for i in range(count):
+            Data = [int(weights[2][stage]) * (int(item_needs[0])) + \
+                    int(weights[1][stage]) * (int(synergy_fitness[0])) + \
+                    int(weights[4][stage]) * int(selection[i][0]) + \
+                    int(weights[3][int(stage)]) * int(champions[int(selection[i][0])][0])]
+            selection[i].append(Data[0])
+            i += 1
+
+        selection.sort(key=lambda x: x[2], reverse=True)
+        print(selection)
 
 
 def Batch_Act(batches):
@@ -48,8 +89,6 @@ def Money_act(money, wins, stage_on_game):
     device = torch.device('')  # 게임내에서는 cud 0으로 바꾸자!
     saved_model_path = 'money_act.pt'
     model = torch.load(weights=saved_model_path, map_location=device)
-
-
 
 
 def check_GAI():
@@ -84,3 +123,62 @@ def check_GAI():
                     pixel_values[int(x)][int(y)][2] == 82):
                 print(str(x) + "green " + str(y))
                 select(560 + x, 170 + y)
+
+
+import cv2
+import numpy as np
+
+
+# 화면 체커 구현 일반게임, 매칭확인, 매칭결과, 매칭수락
+
+def findthescreen():
+    new = pyautogui.screenshot(region=(0, 0, 1920, 1080))
+    image = cv2.cvtColor(np.array(new), cv2.IMREAD_COLOR)
+    result=0#744,835
+    print(image[744][835])
+    if image[744][835][0]== 209 and image[744][835][1]== 145 and image[744][835][2]== 75:
+        result=1
+    if image[]
+
+
+    return result
+
+
+findthescreen()
+
+'''  nextmatch = cv2.imread("fa/nextmatch.jpg", cv2.IMREAD_GRAYSCALE)
+    next_mask =cv2.imread("fa/nextmatch_mask.jpg",cv2.IMREAD_GRAYSCALE)
+    findmatch = cv2.imread("fa/find_match.png", cv2.IMREAD_GRAYSCALE)
+    allow = cv2.imread("fa/allow.png", cv2.IMREAD_GRAYSCALE)
+    startmenu = cv2.imread("fa/startmenu.png", cv2.IMREAD_GRAYSCALE)
+    station = cv2.imread("fa/station.png", cv2.IMREAD_GRAYSCALE)
+    new = pyautogui.screenshot(region=(0, 0, 1920, 1080))
+    image = cv2.cvtColor(np.array(new), cv2.COLOR_BGR2GRAY)  # BGR
+
+    threshold = 0.99
+    result = cv2.matchTemplate(nextmatch, image, cv2.TM_SQDIFF)
+    result = cv2.minMaxLoc(result)
+    minVal, maxVal, minLoc, maxLoc = result
+    x, y = minLoc
+    print(maxVal)
+    if (x == 0 or y == 0 or maxVal < threshold):
+        result = cv2.matchTemplate(findmatch, image, cv2.TM_SQDIFF)
+        minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(result)
+        print(maxVal)
+        x, y = minLoc
+        if (x == 0 or y == 0) or maxVal < threshold:
+            result = cv2.matchTemplate(allow, image, cv2.TM_SQDIFF)
+            minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(result)
+            x, y = maxLoc
+            print(maxVal)
+            if (x == 0 or y == 0 or maxVal < threshold):
+                result = cv2.matchTemplate(startmenu, image, cv2.TM_SQDIFF)
+                minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(result)
+                print(maxVal)
+                x, y = minLoc
+                if (x == 0 or y == 0 or maxVal < threshold):
+                    result = cv2.matchTemplate(station, image, cv2.TM_SQDIFF)
+                    minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(result)
+                    print(maxVal)
+                    x, y = minLoc
+    select(x+100,y+100)'''

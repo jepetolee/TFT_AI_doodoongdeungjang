@@ -63,7 +63,7 @@ def check_numbers():
 
 def checktheboxes():  # 게임 내 박스 파일을 조사하여 캐릭터 배치 현황을 이해하는 함수
     out, source, weights, view_img, save_txt, imgsz = \
-        'inference/output', 'inference/images', 'box.pt', 'store_true', 'store_true', 1920
+        'inference/chamion_output', 'inference/champion_images', 'box.pt', 'store_true', 'store_true', 1920
 
     device = torch_utils.select_device('')
     if os.path.exists(out):
@@ -141,4 +141,4 @@ def checktheboxes():  # 게임 내 박스 파일을 조사하여 캐릭터 배�
     print('Done. (%.3fs)' % (time.time() - t0))
 
 
-checktheboxes()
+#checktheboxes()
