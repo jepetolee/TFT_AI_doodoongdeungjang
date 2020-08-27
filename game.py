@@ -21,15 +21,18 @@ def Running_ACT(stage, grade):  # Epsilon- Episode greedy algorithm
         weights = pd.read_csv('evaluate_data.csv', header=None)
         item_weights = pd.read_csv('evaluate_item.csv', header=None)
         synergy_fitness = [0, 0, 0, 0, 0, 0, 0, 0]  # 시너지 필요도 계산 나중에 불러와야합니다. 남은 시너지,
-        item_needs = [0]  # 아이템 필요도를 산출하는 형식의 데이터도 구현이 필요합니다. 필요한개수, 그리고, 아이템 번호의 강화학습 정도
         selection = []
+        item_needs=[]
+        item_recurrent=open('./item_recurrent.txt', 'r')
         count = 0
         while True:
             cham = champions_file.readline().split()
             item = items_file.readline().split()
+            recurrent_item=item_recurrent.readline().split()
             if not cham: break
             selection.append([cham[0], item[0]])
             count += 1
+
 
         for i in range(count):
             Data = [int(weights[2][stage]) * (int(item_needs[0])) + \
@@ -85,10 +88,14 @@ def Batch_Act(batches):
 # reward= Wins_to_reward()# 몬테 카를로 식으로 구성되어있는 wins와 false 데이터 이를 통해 결과를 산출해 낸다.
 
 
-def Money_act(money, wins, stage,number,):
+def Money_act(money, wins, stage,number):
     champions_file = open('YOLOv5writtencode/inference/chamion_output/champion.txt', 'r')
     items_file = open('YOLOv5writtencode/inference/item_output/item.txt', 'r')
     blocked_item_file=open('YOLOv5writtencode/inference/block_item_output/item.txt', 'r')
+    current_list= open('champion.txt','r')
+    list=current_list.read().split()
+    for i in range(len(list)):
+        new=list[i]
 
     while True:
         cham = champions_file.readline().split()
@@ -102,6 +109,9 @@ def Money_act(money, wins, stage,number,):
         blocked_items= blocked_item_file.readline().split()
         items.append(item[0])
         items.append(blocked_items[0])
+    print(list[0])
+
+
 
 
 
@@ -138,61 +148,4 @@ def check_GAI():
                 print(str(x) + "green " + str(y))
                 select(560 + x, 170 + y)
 
-
-import cv2
-import numpy as np
-
-
-# 화면 체커 구현 일반게임, 매칭확인, 매칭결과, 매칭수락
-
-def findthescreen():
-    new = pyautogui.screenshot(region=(0, 0, 1920, 1080))
-    image = cv2.cvtColor(np.array(new), cv2.IMREAD_COLOR)
-    result=0#744,835
-    print(image[744][835])
-    if image[744][835][0]== 209 and image[744][835][1]== 145 and image[744][835][2]== 75:
-        result=1
-    if image[]
-
-
-    return result
-
-
-findthescreen()
-
-'''  nextmatch = cv2.imread("fa/nextmatch.jpg", cv2.IMREAD_GRAYSCALE)
-    next_mask =cv2.imread("fa/nextmatch_mask.jpg",cv2.IMREAD_GRAYSCALE)
-    findmatch = cv2.imread("fa/find_match.png", cv2.IMREAD_GRAYSCALE)
-    allow = cv2.imread("fa/allow.png", cv2.IMREAD_GRAYSCALE)
-    startmenu = cv2.imread("fa/startmenu.png", cv2.IMREAD_GRAYSCALE)
-    station = cv2.imread("fa/station.png", cv2.IMREAD_GRAYSCALE)
-    new = pyautogui.screenshot(region=(0, 0, 1920, 1080))
-    image = cv2.cvtColor(np.array(new), cv2.COLOR_BGR2GRAY)  # BGR
-
-    threshold = 0.99
-    result = cv2.matchTemplate(nextmatch, image, cv2.TM_SQDIFF)
-    result = cv2.minMaxLoc(result)
-    minVal, maxVal, minLoc, maxLoc = result
-    x, y = minLoc
-    print(maxVal)
-    if (x == 0 or y == 0 or maxVal < threshold):
-        result = cv2.matchTemplate(findmatch, image, cv2.TM_SQDIFF)
-        minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(result)
-        print(maxVal)
-        x, y = minLoc
-        if (x == 0 or y == 0) or maxVal < threshold:
-            result = cv2.matchTemplate(allow, image, cv2.TM_SQDIFF)
-            minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(result)
-            x, y = maxLoc
-            print(maxVal)
-            if (x == 0 or y == 0 or maxVal < threshold):
-                result = cv2.matchTemplate(startmenu, image, cv2.TM_SQDIFF)
-                minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(result)
-                print(maxVal)
-                x, y = minLoc
-                if (x == 0 or y == 0 or maxVal < threshold):
-                    result = cv2.matchTemplate(station, image, cv2.TM_SQDIFF)
-                    minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(result)
-                    print(maxVal)
-                    x, y = minLoc
-    select(x+100,y+100)'''
+Money_act(50,30,20,3)

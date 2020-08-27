@@ -18,7 +18,7 @@ def take():
     pyautogui.press('w')
 
 
-def cylcle():
+def reroll():
     pyautogui.press('d')
 
 
@@ -26,7 +26,7 @@ def sell():
     pyautogui.press('e')
 
 
-def cost_up():
+def level_up():
     pyautogui.press('f')
 
 

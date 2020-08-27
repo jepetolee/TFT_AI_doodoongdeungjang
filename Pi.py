@@ -93,14 +93,14 @@ class RCA(nn.Module):
 
 
 
-model = RCA()
-optimizer=optim.Adam(model.parameters(),lr=0.01,betas=(0.5,0.99))
-criterion =nn.BCELoss()
-model_loss= criterion(result,target)#목표와 타겟을 기준으로
-print("Model's state_dict:")
-for param_tensor in model.state_dict():
-    print(param_tensor, "\t", model.state_dict()[param_tensor].size())
+#model = RCA()
+#optimizer=optim.Adam(model.parameters(),lr=0.01,betas=(0.5,0.99))
+#criterion =nn.BCELoss()
+#model_loss= criterion(result,target)#목표와 타겟을 기준으로
+#print("Model's state_dict:")
+#for param_tensor in model.state_dict():
+#    print(param_tensor, "\t", model.state_dict()[param_tensor].size())
 
-T.save(model.state_dict(), './batch.pt')
+#T.save(model.state_dict(), './batch.pt')
 
 
