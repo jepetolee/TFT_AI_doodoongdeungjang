@@ -11,7 +11,9 @@ import torch.backends.cudnn as cudnn
 import pandas as pd
 
 
-def Running_ACT(stage, grade):  # Episode greedy algorithm
+Epsilon = 0.1
+
+def Running_ACT(stage, grade):  # Epsilon- Episode greedy algorithm
 
     if stage == 1:
         champions_file = open('YOLOv5writtencode/inference/chamion_output/champion.txt', 'r')
@@ -71,7 +73,7 @@ def Running_ACT(stage, grade):  # Episode greedy algorithm
 
 def Batch_Act(batches):
     device = torch.device('')  # 게임내에서는 cud 0으로 바꾸자!
-    saved_model_path = 'batch_act.pt'
+    saved_model_path = 'batch.pt'
     # champions  챔피언의 정보에 해당하는 배치를 두고 계산
     model = torch.load(weights=saved_model_path, map_location=device)
     # 모델을 통과 시켜 무조건 나오는 값을 보고 추론
@@ -83,12 +85,24 @@ def Batch_Act(batches):
 # reward= Wins_to_reward()# 몬테 카를로 식으로 구성되어있는 wins와 false 데이터 이를 통해 결과를 산출해 낸다.
 
 
-def Money_act(money, wins, stage_on_game):
-    if stage_on_game != 1 and wins == 1:
-        print(money)
-    device = torch.device('')  # 게임내에서는 cud 0으로 바꾸자!
-    saved_model_path = 'money_act.pt'
-    model = torch.load(weights=saved_model_path, map_location=device)
+def Money_act(money, wins, stage,number,):
+    champions_file = open('YOLOv5writtencode/inference/chamion_output/champion.txt', 'r')
+    items_file = open('YOLOv5writtencode/inference/item_output/item.txt', 'r')
+    blocked_item_file=open('YOLOv5writtencode/inference/block_item_output/item.txt', 'r')
+
+    while True:
+        cham = champions_file.readline().split()
+        if not cham: break
+        synergies = []
+        job=[]
+        items=[]
+        synergies.append(champions[int(cham[0])][1])
+        job.append([champions[int(cham[0])][2],champions[int(cham[0])][3]])
+        item = items_file.readline().split()
+        blocked_items= blocked_item_file.readline().split()
+        items.append(item[0])
+        items.append(blocked_items[0])
+
 
 
 def check_GAI():
