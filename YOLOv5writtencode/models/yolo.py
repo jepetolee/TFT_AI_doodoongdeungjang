@@ -1,13 +1,15 @@
 import argparse
 from copy import deepcopy
 
-from models.experimental import *
+from YOLOv5writtencode.models.experimental import *
 
 
 class Detect(nn.Module):
+    stride = None  # strides computed during build
+    export = False  # onnx export
+
     def __init__(self, nc=80, anchors=(), ch=()):  # detection layer
         super(Detect, self).__init__()
-        self.stride = None  # strides computed during build
         self.nc = nc  # number of classes
         self.no = nc + 5  # number of outputs per anchor
         self.nl = len(anchors)  # number of detection layers
@@ -17,7 +19,6 @@ class Detect(nn.Module):
         self.register_buffer('anchors', a)  # shape(nl,na,2)
         self.register_buffer('anchor_grid', a.clone().view(self.nl, 1, -1, 1, 1, 2))  # shape(nl,1,na,1,1,2)
         self.m = nn.ModuleList(nn.Conv2d(x, self.no * self.na, 1) for x in ch)  # output conv
-        self.export = False  # onnx export
 
     def forward(self, x):
         # x = x.copy()  # for profiling
@@ -43,6 +44,8 @@ class Detect(nn.Module):
     def _make_grid(nx=20, ny=20):
         yv, xv = torch.meshgrid([torch.arange(ny), torch.arange(nx)])
         return torch.stack((xv, yv), 2).view((1, 1, ny, nx, 2)).float()
+
+
 
 
 class Model(nn.Module):
