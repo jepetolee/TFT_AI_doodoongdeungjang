@@ -1,6 +1,8 @@
 # TFT_AI_doodoongdeungjang
-the A.I. project of  TFT
 ![down](https://user-images.githubusercontent.com/55366212/92316965-23ef3180-f036-11ea-849d-ac8cd2b0efba.jpg)
+
+
+the A.I. project of  TFT
 KOR
 1. 이 문서는 한국 디지털 미디어 고등학교내 인공지능 연구 동아리인 Fregic에 의하여 작성 되었음을 명시합니다.
 2. 우리는 기존의 RL 알고리즘을 탐구하기 위해 이 문서를 작성하였으며, 공유하여 사용하는 프로젝트임을 명시합니다.
