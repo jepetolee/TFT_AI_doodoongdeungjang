@@ -116,9 +116,9 @@ def check_Stage():
     device = torch_utils.select_device('')
     weights = 'number.pt'
     classes = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
-    stage = ImageGrab.grab(bbox=(785, 35, 795, 55)).resize((28, 28)).convert("L")
+    stage = ImageGrab.grab(bbox=(840, 35, 850, 55)).resize((28, 28)).convert("L")
 
-    gauze = ImageGrab.grab(bbox=(805, 35, 815, 55)).resize((28, 28)).convert("L")
+    gauze = ImageGrab.grab(bbox=(860, 35, 870, 55)).resize((28, 28)).convert("L")
     model = CNN()
     checkpoint = torch.load(weights, device)
     model.load_state_dict(checkpoint, device)
@@ -131,7 +131,6 @@ def check_Stage():
     stage = classes[int(stage[0])]
     gauze = torch.max(gauze, 1)
     gauze = classes[int(gauze[0])]
-    print(stage, gauze)
     return stage, gauze
 
 
@@ -205,101 +204,6 @@ def check_the_line():
 
 def check_finished():
     print()
-
-
-def item():  # 게임 내 박스 파일을 조사하여 캐릭터 배치 현황을 이해하는 함수
-    out, source, weights, view_img, save_txt, imgsz = \
-        'inference/item_output', 'inference/item_images', 'item.pt', 'store_true', 'store_true', 1920
-
-    webcam = source == '0' or source.startswith('rtsp') or source.startswith('http') or source.endswith('.txt')
-
-    device = torch_utils.select_device('')
-    if os.path.exists(out):
-        shutil.rmtree(out)  # delete output folder
-    os.makedirs(out)  # make new output folder
-    half = device.type != 'cpu'  # half precision only supported on CUDA
-
-    # Load model
-    model = attempt_load(weights, map_location=device)  # load FP32 model
-    imgsz = check_img_size(imgsz, s=model.stride.max())  # check img_size
-    if half:
-        model.half()  # to FP16
-
-    # Set Dataloader
-    vid_path, vid_writer = None, None
-    if webcam:
-        view_img = True
-        cudnn.benchmark = True  # set True to speed up constant image size inference
-        dataset = LoadStreams(source, img_size=imgsz)
-    else:
-        save_img = True
-        dataset = LoadImages(source, img_size=imgsz)
-
-    # Get names and colors
-    names = model.module.names if hasattr(model, 'module') else model.names
-    colors = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(names))]
-
-    # Run inference
-    t0 = time.time()
-    img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
-    _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
-    for path, img, im0s, vid_cap in dataset:
-        img = torch.from_numpy(img).to(device)
-        img = img.half() if half else img.float()  # uint8 to fp16/32
-        img /= 255.0  # 0 - 255 to 0.0 - 1.0
-        if img.ndimension() == 3:
-            img = img.unsqueeze(0)
-
-        # Inference
-
-        pred = model(img, augment=None)[0]
-
-        # Apply NMS
-        pred = non_max_suppression(pred, 0.4, 0.5, classes=None, agnostic=False)
-
-        # Process detections
-        for i, det in enumerate(pred):  # detections per image
-            if webcam:  # batch_size >= 1
-                p, s, im0 = path[i], '%g: ' % i, im0s[i].copy()
-            else:
-                p, s, im0 = path, '', im0s
-
-            save_path = str(Path(out) / Path(p).name)
-            txt_path = str(Path(out) / Path(p).stem) + ('_%g' % dataset.frame if dataset.mode == 'video' else '')
-            s += '%gx%g ' % img.shape[2:]  # print string
-            gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
-            if det is not None and len(det):
-                # Rescale boxes from img_size to im0 size
-                det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
-
-                # Print results
-                for c in det[:, -1].unique():
-                    n = (det[:, -1] == c).sum()  # detections per class
-                    s += '%g %ss, ' % (n, names[int(c)])  # add to string
-
-                # Write results
-                for *xyxy, conf, cls in reversed(det):
-                    if save_txt:  # Write to file
-                        xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
-                        with open(txt_path + '.txt', 'a') as f:
-                            f.write(('%g ' * 5 + '\n') % (cls, *xywh))  # label format
-
-                    if save_img or view_img:  # Add bbox to image
-                        label = '%s %.2f' % (names[int(cls)], conf)
-                        plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
-
-            # Print time (inference + NMS)
-
-            # Save results (image with detections)
-            if save_img:
-                if dataset.mode == 'images':
-                    cv2.imwrite(save_path, im0)
-
-                # Save results (image with detections)
-            if save_img:
-                cv2.imwrite(save_path, im0)
-    print('Done. (%.3fs)' % (time.time() - t0))
-
 
 def itembox():  # 게임 내 박스 파일을 조사하여 캐릭터 배치 현황을 이해하는 함수
     out, source, weights, view_img, save_txt, imgsz = \
@@ -478,17 +382,116 @@ def checktheboxes():  # 게임 내 박스 파일을 조사하여 캐릭터 배�
 import pandas as pd
 
 
+def iteem():  # 게임 내 박스 파일을 조사하여 캐릭터 배치 현황을 이해하는 함수
+    out, source, weights, view_img, save_txt, imgsz = \
+        'inference/item_output', 'inference/item_images', 'item.pt', 'store_true', 'store_true', 1920
+
+    webcam = source == '0' or source.startswith('rtsp') or source.startswith('http') or source.endswith('.txt')
+
+    device = torch_utils.select_device('')
+    if os.path.exists(out):
+        shutil.rmtree(out)  # delete output folder
+    os.makedirs(out)  # make new output folder
+    half = device.type != 'cpu'  # half precision only supported on CUDA
+
+    # Load model
+    model = attempt_load(weights, map_location=device)  # load FP32 model
+    imgsz = check_img_size(imgsz, s=model.stride.max())  # check img_size
+    if half:
+        model.half()  # to FP16
+
+    # Set Dataloader
+    vid_path, vid_writer = None, None
+    if webcam:
+        view_img = True
+        cudnn.benchmark = True  # set True to speed up constant image size inference
+        dataset = LoadStreams(source, img_size=imgsz)
+    else:
+        save_img = True
+        dataset = LoadImages(source, img_size=imgsz)
+
+    # Get names and colors
+    names = model.module.names if hasattr(model, 'module') else model.names
+    colors = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(names))]
+
+    # Run inference
+    t0 = time.time()
+    img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
+    _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
+    for path, img, im0s, vid_cap in dataset:
+        img = torch.from_numpy(img).to(device)
+        img = img.half() if half else img.float()  # uint8 to fp16/32
+        img /= 255.0  # 0 - 255 to 0.0 - 1.0
+        if img.ndimension() == 3:
+            img = img.unsqueeze(0)
+
+        # Inference
+
+        pred = model(img, augment=None)[0]
+
+        # Apply NMS
+        pred = non_max_suppression(pred, 0.4, 0.5, classes=None, agnostic=False)
+
+        # Process detections
+        for i, det in enumerate(pred):  # detections per image
+            if webcam:  # batch_size >= 1
+                p, s, im0 = path[i], '%g: ' % i, im0s[i].copy()
+            else:
+                p, s, im0 = path, '', im0s
+
+            save_path = str(Path(out) / Path(p).name)
+            txt_path = str(Path(out) / Path(p).stem) + ('_%g' % dataset.frame if dataset.mode == 'video' else '')
+            s += '%gx%g ' % img.shape[2:]  # print string
+            gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
+            if det is not None and len(det):
+                # Rescale boxes from img_size to im0 size
+                det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
+
+                # Print results
+                for c in det[:, -1].unique():
+                    n = (det[:, -1] == c).sum()  # detections per class
+                    s += '%g %ss, ' % (n, names[int(c)])  # add to string
+
+                # Write results
+                for *xyxy, conf, cls in reversed(det):
+                    if save_txt:  # Write to file
+                        xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
+                        with open(txt_path, 'a') as f:
+                            f.write(('%g ' * 5 + '\n') % (cls, *xywh))  # label format
+
+                    if save_img or view_img:  # Add bbox to image
+                        label = '%s %.2f' % (names[int(cls)], conf)
+                        plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+
+            # Print time (inference + NMS)
+
+            # Save results (image with detections)
+            if save_img:
+                if dataset.mode == 'images':
+                    cv2.imwrite(save_path, im0)
+
+                # Save results (image with detections)
+            if save_img:
+                cv2.imwrite(save_path, im0)
+    print('Done. (%.3fs)' % (time.time() - t0))
+
+
 def Money_act(stage, number):
-    checktheboxes()
-    item()
+
+    iteem()
     itembox()
+    stage=int(stage)
+    number=int(number)
     if stage == 1:
         xp = number
     else:
         xp = 7 * (stage - 1) + number + 4
     level = count_levels(xp, stage)
     champions_file = open('D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/inference/chamion_output/chamion.txt', 'r')
+
     items_file = open('D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/inference/item_output/item.txt', 'r')
+
+
     blocked_item_file = open('D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/inference/block_item_output/item.txt', 'r')
     # current_list = open('D:/TFT_AI_doodoongdeungjang/champion.txt', 'r')
     accompany = open('D:/TFT_AI_doodoongdeungjang/current_level.txt', 'r')
@@ -507,9 +510,10 @@ def Money_act(stage, number):
     for i in range(len(list)):
         new = list[i]
 '''
+    i=0
     chams = []
     synergies = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    job = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    job = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0]
     items = []
     needs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -517,29 +521,33 @@ def Money_act(stage, number):
     weights = pd.read_csv('D:/TFT_AI_doodoongdeungjang/evaluate_data.csv', header=None)
     # 기록
     while True:
+
         cham = champions_file.readline().split()
         if not cham: break
         chams.append(cham[0])
         synergies[int(champions[int(cham[0])][1]) - 1] += 1
         job[int(champions[int(cham[0])][2]) - 1] += 1
         job[int(champions[int(cham[0])][3]) - 1] += 1
-        item = items_file.readline().split()
-        if (int(item[0]) == 10):
-            level += 1
-        blocked_items = blocked_item_file.readline().split()
-        if (int(blocked_items[0]) == 10):
-            level += 1
-        items.append(item[0])
+        item = items_file.readline().split( )
 
-        items.append(blocked_items[0])
+        if (int(item[i][0]) == 10):
+            level += 1
+        blocked_items = blocked_item_file.readline().split( )
+        items.append(item[i][0])
+        if not blocked_items:break
+        else:
+            items.append(blocked_items[0])
     for i in range(len(chams)):
         needs[int(chams[i]) - 1] += 1
     for i in range(len(selection)):
+        print()
+        if stage==0:
+            stage+=1
         Data = int(weights[1][stage]) * (int(needs[int(selection[i])])) + \
                int(weights[4][stage]) * int(selection[i]) + \
-               int(synergies[int(champions[int(selection[i])][1]) - 1]) + \
-               int(job[int(champions[int(selection[i])][2]) - 1]) + \
-               int(job[int(champions[int(selection[i])][3]) - 1])
+               int(synergies[int(champions[int(selection[i])][1])]) + \
+               int(job[int(champions[int(selection[i])][2])]) + \
+               int(job[int(champions[int(selection[i])][3])])
 
         if Data > gold_need.values[stagepoint][1]:
             select(buying_batch[i][0], buying_batch[i][1])
@@ -561,10 +569,40 @@ def start_game():  # detect class 에서 화면의 종류를 찾고 객체의 �
     select(855, 845)
     select(855, 845)
 
-    for i in range(12):
+    for i in range(8):
         select(970, 710)
         time.sleep(5)
 
+def Running_ACT(stage, grade):  # Epsilon- Episode greedy algorithm
+
+    champions_file = open('D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/inference/chamion_output/chamion.txt', 'r')
+    items_file = open('D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/inference/item_output/item.txt', 'r')
+    weights = pd.read_csv('D:/TFT_AI_doodoongdeungjang/evaluate_data.csv', header=None)
+    # item_weights = pd.read_csv('evaluate_item.csv', header=None)
+    synergy_fitness = [0, 0, 0, 0, 0, 0, 0, 0]  # 시너지 필요도 계산 나중에 불러와야합니다. 남은 시너지,
+    item_needs = [0]  # 아이템 필요도를 산출하는 형식의 데이터도 구현이 필요합니다. 필요한개수, 그리고, 아이템 번호의 강화학습 정도
+    selection = []
+    count = 0
+    while True:
+        cham = champions_file.readline().split()
+        item = items_file.readline().split()
+        if not cham: break
+        selection.append([cham[0], cham[1], cham[2], item[0]])
+        count += 1
+    for i in range(count):
+        Data = [int(weights[stage][2]) * (int(item_needs[0])) + \
+                int(weights[stage][1]) * (int(synergy_fitness[0])) + \
+                int(weights[stage][1]) * int(selection[i][0]) + \
+                int(weights[stage][3]) * int(champions[int(selection[i][0])][0])]
+        selection[i].append(Data[0])
+        i += 1
+
+    selection.sort(key=lambda x: x[2], reverse=True)
+    for i in range(16):
+        if float(selection[0][1]) * 1920 - circular_batch[i][0] <= 40 and float(selection[0][2]) * 1080 - circular_batch[i][0] <= 20:
+            for i in range(5):
+                move(int(circular_batch[i + 5][0]), int(circular_batch[i + 5][1]))
+                time.sleep(0.25)
 
 def finish_game():
     select(840, 520)
@@ -586,18 +624,26 @@ def finish_game():
 
 from game import *
 
+
 if __name__ == '__main__':
     start_game()
     finsihed = False
     time.sleep(5)
+    checktheboxes()
+
     while finsihed != True:
         stage, gauze = check_Stage()
-        if (stage == 1 and gauze == 1) or (gauze == 4 and stage != 1):
+        print(stage)
+        print(gauze)
+        if (int(stage) == 1 and int(gauze) == 1) or (int(gauze) == 4 and int(stage) != 1):
+            print("RUN")
             Running_ACT(stage, gauze)
-        elif (type == 1):
+        else:
+            print("DE")
             Money_act(stage, gauze)
-            Batch_Act()
+            Batch_Act(stage, gauze)
             check_GAI()
 
+        time.sleep(10)
         finsihed = check_finished()
     finish_game()

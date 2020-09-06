@@ -1,6 +1,5 @@
 from Variables import *
 from PIL import ImageGrab
-from YOLOv5writtencode.finding import *
 from Pi import *
 import torch
 import pandas as pd
@@ -10,80 +9,25 @@ import numpy as np
 Epsilon = 0.1
 
 
-def Running_ACT(stage, grade):  # Epsilon- Episode greedy algorithm
-    if stage == 1:
-        champions_file = open('YOLOv5writtencode/inference/chamion_output/champion.txt', 'r')
-        items_file = open('YOLOv5writtencode/inference/item_output/item.txt', 'r')
-        weights = pd.read_csv('evaluate_data.csv', header=None)
-        item_weights = pd.read_csv('evaluate_item.csv', header=None)
-        synergy_fitness = [0, 0, 0, 0, 0, 0, 0, 0]  # 시너지 필요도 계산 나중에 불러와야합니다. 남은 시너지,
-        selection = []
-        item_needs = []
-        item_recurrent = open('./item_recurrent.txt', 'r')
-        count = 0
-        while True:
-            cham = champions_file.readline().split()
-            item = items_file.readline().split()
-            recurrent_item = item_recurrent.readline().split()
-            if not cham: break
-            selection.append([cham[0],cham[1],cham[2], item[0]])
-            count += 1
 
-        for i in range(count):
-            Data = [int(weights[2][stage]) * (int(item_needs[0])) + \
-                    int(weights[1][stage]) * (int(synergy_fitness[0])) + \
-                    int(weights[4][stage]) * int(selection[i][0]) + \
-                    int(weights[3][int(stage)]) * int(champions[int(selection[i][0])][0])]
-            selection[i].append(Data[0])
-            i += 1
-        selection.sort(key=lambda x: x[2], reverse=True)
-
-    else:
-        # 등수에 따른 경과시간을 잰후
-
-        champions_file = open('YOLOv5writtencode/inference/chamion_output/champion.txt', 'r')
-        items_file = open('YOLOv5writtencode/inference/item_output/item.txt', 'r')
-        weights = pd.read_csv('evaluate_data.csv', header=None)
-        #item_weights = pd.read_csv('evaluate_item.csv', header=None)
-        synergy_fitness = [0, 0, 0, 0, 0, 0, 0, 0]  # 시너지 필요도 계산 나중에 불러와야합니다. 남은 시너지,
-        item_needs = [0]  # 아이템 필요도를 산출하는 형식의 데이터도 구현이 필요합니다. 필요한개수, 그리고, 아이템 번호의 강화학습 정도
-        selection = []
-        count = 0
-        while True:
-            cham = champions_file.readline().split()
-            item = items_file.readline().split()
-            if not cham: break
-            selection.append([cham[0], item[0]])
-            count += 1
-
-        for i in range(count):
-            Data = [int(weights[2][stage]) * (int(item_needs[0])) + \
-                    int(weights[1][stage]) * (int(synergy_fitness[0])) + \
-                    int(weights[4][stage]) * int(selection[i][0]) + \
-                    int(weights[3][int(stage)]) * int(champions[int(selection[i][0])][0])]
-            selection[i].append(Data[0])
-            i += 1
-
-        selection.sort(key=lambda x: x[2], reverse=True)
-    for i in range(16):
-        if int(selection[0][1])*1920-circular_batch[i][0]<40 and int(selection[0][2])*1080-circular_batch[i][0]<20:
-            move(int(circular_batch[i+5][0]), int(circular_batch[i+5][1]))
 
 def Batch_Act(stage, gauze):
+    stage= int(stage)
+    gauze=int(gauze)
 
     device = torch_utils.select_device('')  # 게임내에서는 cud 0으로 바꾸자!
     targets= pd.read_csv('D:/TFT_AI_doodoongdeungjang/target.csv', header=None)
-    champions_file = open('YOLOv5writtencode/inference/chamion_output/champion.txt', 'r')
+    champions_file = open('D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/inference/chamion_output/chamion.txt', 'r')
     batches=[]
     while True:
         cham = champions_file.readline().split()
-        batches.append([cham[0],cham[1],cham[2]])
         if not cham: break
+        batches.append([cham[0],cham[1],cham[2]])
 
     if stage==1:
-        target=targets[stage+gauze-2][1]
+        target=1
     else:
-        target=targets[7*(stage-2)+3+gauze][1]
+        target=0
 
     if target==1:
         saved_model_path = 'win.pt'
@@ -104,14 +48,17 @@ def Batch_Act(stage, gauze):
         level_up()
 
     for i in range(len(batches)):
-        r=np.array([batches[i]])
-        batch=torch.tensor(r,dtype=torch.float).cuda()
+        r=np.array([batches[i][0]])
+
+        batch=torch.tensor([int(r)],dtype=torch.float).cuda()
+        print(batch)
+        print(batch.size())
         result=model(batch)
         result=result.max(dim=0)
         result=classes[int(result[1])]
-        select(int(ally_batch[result][0]),int(ally_batch[result][0]))
+        select(int(ally_batch[int(result)][0]),int(ally_batch[int(result)][0]))
         take()
-        moveon(1920*int(batches[i][0]),1080*int(batches[i][1]),int(ally_batch[result][0]),int(ally_batch[result][0]))
+        moveon(1920*float(batches[i][0]),1080*float(batches[i][1]),int(ally_batch[int(result)][0]),int(ally_batch[int(result)][0]))
 
 def check_GAI():
     given_image = ImageGrab.grab(bbox=(560, 170, 1360, 720))
