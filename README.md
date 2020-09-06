@@ -25,4 +25,5 @@ There is three_Agents.
    There are two variables we got, champion and item. 
    So, we can make a selection for sushi-lists.
    we can evaluate those objects for give them score.
-2. 
+2. Money_act:
+   These agent determines the selection.
