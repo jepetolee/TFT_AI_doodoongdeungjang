@@ -301,7 +301,7 @@ def itembox():  # 게임 내 박스 파일을 조사하여 캐릭터 배치 현�
 
 def checktheboxes():  # 게임 내 박스 파일을 조사하여 캐릭터 배치 현황을 이해하는 함수
     out, source, weights, view_img, save_txt, imgsz = \
-        'D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/inference/chamion_output', 'D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/inference/champion_images', 'D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/box.pt', 'store_true', 'store_true', 1920
+        'D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/inference/chamion_output', 'D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/inference/champion_images', 'D:/TFT_AI_doodoongdeungjang/YOLOv5writtencode/best.pt', 'store_true', 'store_true', 1920
 
     device = torch_utils.select_device('')
     if os.path.exists(out):
@@ -624,7 +624,7 @@ def finish_game():
 
 from game import *
 
-
+'''
 if __name__ == '__main__':
     start_game()
     finsihed = False
@@ -646,4 +646,6 @@ if __name__ == '__main__':
 
         time.sleep(10)
         finsihed = check_finished()
-    finish_game()
+    finish_game()'''
+
+checktheboxes()
